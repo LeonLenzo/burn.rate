@@ -99,16 +99,53 @@ with col1:
     )
 
 with col2:
-    # Display daily summary
-    metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
-    with metrics_col1:
-        st.metric("Calories", f"{int(total_daily_calories)}")
-    with metrics_col2:
-        st.metric("Protein", f"{total_daily_protein:.1f}g")
-    with metrics_col3:
-        st.metric("Fat", f"{total_daily_fat:.1f}g")
-    with metrics_col4:
-        st.metric("Carbs", f"{total_daily_carbs:.1f}g")
+    # Display daily summary with custom CSS for better mobile layout
+    st.markdown("""
+    <style>
+        .metric-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .metric-box {
+            background-color: #f0f2f6;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .metric-label {
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Then replace your metrics section with:
+    st.markdown(f"""
+    <div class="metric-container">
+        <div class="metric-box">
+            <div class="metric-label">Calories</div>
+            <div class="metric-value">{int(total_daily_calories)}</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Protein</div>
+            <div class="metric-value">{total_daily_protein:.1f}g</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Fat</div>
+            <div class="metric-value">{total_daily_fat:.1f}g</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-label">Carbs</div>
+            <div class="metric-value">{total_daily_carbs:.1f}g</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Daily calorie target progress
 daily_goal = st.session_state.daily_goal
@@ -238,21 +275,19 @@ with st.expander("🔎 Search", expanded=False):
             st.info("No food selected. Use the search box to find and select a food.")
 
 # SECTION 2: Display food log for selected date
-with st.expander("📋 Log", expanded=False):
-        
+with st.expander("Food Log", expanded=False):
+    st.subheader(f"Food log details")
+    
     if date_str in st.session_state.food_logs and st.session_state.food_logs[date_str]:
         log_entries = st.session_state.food_logs[date_str]
         
-        # Display individual entries
+        # Display individual entries in a mobile-friendly format
         for i, entry in enumerate(log_entries):
-            col1, col2, col3 = st.columns([3, 1, 1])
+            st.write(f"**{entry['food_name']}** ({entry['weight_g']}g)")
+            st.caption(f"{entry['total_calories']} cal, {entry['total_protein']}g protein, {entry['total_fat']}g fat, {entry['total_carbs']}g carbs")
             
+            col1, col2 = st.columns([1, 1])
             with col1:
-                st.write(f"{entry['food_name']} ({entry['weight_g']}g)")
-                st.caption(f"{entry['total_calories']} cal, {entry['total_protein']}g protein, {entry['total_fat']}g fat, {entry['total_carbs']}g carbs")
-            
-            with col2:
-                # Adjust weight
                 new_weight = st.number_input(
                     "g", 
                     min_value=1, 
@@ -293,7 +328,7 @@ with st.expander("📋 Log", expanded=False):
                         except Exception as e:
                             st.error(f"Error updating entry: {e}")
             
-            with col3:
+            with col2:
                 if st.button("Remove", key=f"remove_{i}"):
                     log_entries.pop(i)
                     
