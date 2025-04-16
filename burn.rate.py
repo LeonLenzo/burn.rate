@@ -64,10 +64,15 @@ except Exception as e:
 #Section 0: Overview
 with st.expander(" 🔥Overview", expanded=True):
 
-    # Date selection
-    selected_date = st.date_input("Select date", date.today(), key="date_selector")
+    # Date selection with better formatting
+    selected_date = st.date_input(
+        "Date", 
+        date.today(), 
+        key="date_selector", 
+        help="Select date to view or add food entries"
+    )
     date_str = selected_date.strftime("%Y-%m-%d")
-
+    
     # Initialize food log for selected date if it doesn't exist
     if date_str not in st.session_state.food_logs:
         st.session_state.food_logs[date_str] = []
@@ -75,9 +80,6 @@ with st.expander(" 🔥Overview", expanded=True):
     # Set default calorie goal
     if 'daily_goal' not in st.session_state:
         st.session_state.daily_goal = 2000
-
-    # Display summary at the top of the app
-    st.subheader(f"{selected_date.strftime('%A, %B %d')}")
 
     # Get the log entries for the selected date
     log_entries = st.session_state.food_logs.get(date_str, [])
@@ -244,7 +246,9 @@ with st.expander("🔎 Search", expanded=st.session_state.search_expanded):
         )
         
         if search_query:
+            # Immediately update selection and rerun to show the different food button
             st.session_state.current_selection = search_query
+            st.rerun()
     
     if search_query or st.session_state.current_selection:
         # Determine which food to display
@@ -257,7 +261,7 @@ with st.expander("🔎 Search", expanded=st.session_state.search_expanded):
             selected_food = selected_food.iloc[0]
             
             # Display food info and add form
-            st.subheader(f"Selected Food: {selected_food['FoodName']}")
+            st.subheader(f"{selected_food['FoodName']}")
             
             col1, col2 = st.columns([2, 1])
             
@@ -277,7 +281,7 @@ with st.expander("🔎 Search", expanded=st.session_state.search_expanded):
                     'carbs': float(selected_food['Carbs'])
                 }, weight)
                 
-                st.metric("Calories for selected amount", f"{int(nutrition['calories'])} kcal")
+                st.metric("Total:", f"{int(nutrition['calories'])} kcal")
                 
                 if st.button("Add to Log", key="add_selected_food"):
                     add_food_to_log(selected_food, weight)
