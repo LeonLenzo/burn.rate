@@ -61,152 +61,161 @@ except Exception as e:
     st.error(f"Failed to load AUSNUT database: {e}")
     st.stop()
 
-# Date selection
-selected_date = st.date_input("Select date", date.today(), key="date_selector")
-date_str = selected_date.strftime("%Y-%m-%d")
+#Section 0: Overview
+with st.expander(" 🔥Overview", expanded=True):
 
-# Initialize food log for selected date if it doesn't exist
-if date_str not in st.session_state.food_logs:
-    st.session_state.food_logs[date_str] = []
+    # Date selection
+    selected_date = st.date_input("Select date", date.today(), key="date_selector")
+    date_str = selected_date.strftime("%Y-%m-%d")
 
-# Set default calorie goal
-if 'daily_goal' not in st.session_state:
-    st.session_state.daily_goal = 2000
+    # Initialize food log for selected date if it doesn't exist
+    if date_str not in st.session_state.food_logs:
+        st.session_state.food_logs[date_str] = []
 
-# Display summary at the top of the app
-st.subheader(f"{selected_date.strftime('%A, %B %d')}")
+    # Set default calorie goal
+    if 'daily_goal' not in st.session_state:
+        st.session_state.daily_goal = 2000
 
-# Get the log entries for the selected date
-log_entries = st.session_state.food_logs.get(date_str, [])
+    # Display summary at the top of the app
+    st.subheader(f"{selected_date.strftime('%A, %B %d')}")
 
-# Calculate daily nutrition totals
-total_daily_calories = sum(entry['total_calories'] for entry in log_entries) if log_entries else 0
-total_daily_protein = sum(entry['total_protein'] for entry in log_entries) if log_entries else 0
-total_daily_fat = sum(entry['total_fat'] for entry in log_entries) if log_entries else 0
-total_daily_carbs = sum(entry['total_carbs'] for entry in log_entries) if log_entries else 0
+    # Get the log entries for the selected date
+    log_entries = st.session_state.food_logs.get(date_str, [])
 
-# Layout for daily goal adjustment and summary
-col1, col2 = st.columns([1, 3])
+    # Calculate daily nutrition totals
+    total_daily_calories = sum(entry['total_calories'] for entry in log_entries) if log_entries else 0
+    total_daily_protein = sum(entry['total_protein'] for entry in log_entries) if log_entries else 0
+    total_daily_fat = sum(entry['total_fat'] for entry in log_entries) if log_entries else 0
+    total_daily_carbs = sum(entry['total_carbs'] for entry in log_entries) if log_entries else 0
 
-with col1:
-    st.session_state.daily_goal = st.number_input(
-        "Goal",
-        min_value=500,
-        max_value=5000,
-        value=st.session_state.daily_goal,
-        step=100,
-        key="daily_goal_input"
-    )
+    # Layout for daily goal adjustment and summary
+    col1, col2 = st.columns([1, 3])
 
-with col2:
-    # Display daily summary with custom CSS for better mobile layout
-    st.markdown("""
-    <style>
-        .metric-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .metric-box {
-            background-color: #0E1117;
-            border-radius: 5px;
-            padding: 10px;
-            text-align: center;
-        }
-        .metric-label {
-            font-size: 1rem;
-            color: #FFFFFF;
-            margin-bottom: 5px;
-        }
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #FFFFFF;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    with col1:
+        st.session_state.daily_goal = st.number_input(
+            "Goal",
+            min_value=500,
+            max_value=5000,
+            value=st.session_state.daily_goal,
+            step=100,
+            key="daily_goal_input"
+        )
 
-    # Then replace your metrics section with:
-    st.markdown(f"""
-    <div class="metric-container">
-        <div class="metric-box">
-            <div class="metric-label">Calories</div>
-            <div class="metric-value">{int(total_daily_calories)}</div>
+    with col2:
+        # Display daily summary with custom CSS for better mobile layout
+        st.markdown("""
+        <style>
+            .metric-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .metric-box {
+                background-color: #0E1117;
+                border-radius: 5px;
+                padding: 10px;
+                text-align: center;
+            }
+            .metric-label {
+                font-size: 1rem;
+                color: #FFFFFF;
+                margin-bottom: 5px;
+            }
+            .metric-value {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #FFFFFF;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Then replace your metrics section with:
+        st.markdown(f"""
+        <div class="metric-container">
+            <div class="metric-box">
+                <div class="metric-label">Calories</div>
+                <div class="metric-value">{int(total_daily_calories)}</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Protein</div>
+                <div class="metric-value">{total_daily_protein:.1f}g</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Fat</div>
+                <div class="metric-value">{total_daily_fat:.1f}g</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">Carbs</div>
+                <div class="metric-value">{total_daily_carbs:.1f}g</div>
+            </div>
         </div>
-        <div class="metric-box">
-            <div class="metric-label">Protein</div>
-            <div class="metric-value">{total_daily_protein:.1f}g</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Fat</div>
-            <div class="metric-value">{total_daily_fat:.1f}g</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Carbs</div>
-            <div class="metric-value">{total_daily_carbs:.1f}g</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-# Daily calorie target progress
-daily_goal = st.session_state.daily_goal
-st.progress(min(total_daily_calories / daily_goal, 1.0))
-st.divider()
+    # Daily calorie target progress
+    daily_goal = st.session_state.daily_goal
+    st.progress(min(total_daily_calories / daily_goal, 1.0))
+    st.divider()
 
-# Function to calculate nutritional values based on weight
-def calculate_nutrition(base_values, weight_in_grams):
-    # Base values are per 100g, so multiply by weight/100
-    factor = weight_in_grams / 100
-    return {k: v * factor for k, v in base_values.items()}
+    # Function to calculate nutritional values based on weight
+    def calculate_nutrition(base_values, weight_in_grams):
+        # Base values are per 100g, so multiply by weight/100
+        factor = weight_in_grams / 100
+        return {k: v * factor for k, v in base_values.items()}
 
-# Function to add food to log
-def add_food_to_log(food, weight):
-    # Calculate nutrition based on weight
-    nutrition = calculate_nutrition({
-        'calories': float(food['Calories']),
-        'protein': float(food['Protein']),
-        'fat': float(food['Fat']), 
-        'carbs': float(food['Carbs'])
-    }, weight)
+    # Function to add food to log
+    def add_food_to_log(food, weight):
+        # Calculate nutrition based on weight
+        nutrition = calculate_nutrition({
+            'calories': float(food['Calories']),
+            'protein': float(food['Protein']),
+            'fat': float(food['Fat']), 
+            'carbs': float(food['Carbs'])
+        }, weight)
+        
+        # Add food to log
+        log_entry = {
+            'food_id': str(food['FoodID']),
+            'food_name': str(food['FoodName']),
+            'weight_g': int(weight),
+            'calories': int(food['Calories']),  # Per 100g
+            'protein': float(food['Protein']),    # Per 100g
+            'fat': float(food['Fat']),            # Per 100g
+            'carbs': float(food['Carbs']),        # Per 100g
+            'total_calories': int(nutrition['calories']),
+            'total_protein': round(float(nutrition['protein']), 1),
+            'total_fat': round(float(nutrition['fat']), 1),
+            'total_carbs': round(float(nutrition['carbs']), 1),
+            'time_added': pd.Timestamp.now().strftime("%H:%M")
+        }
+        
+        st.session_state.food_logs[date_str].append(log_entry)
+        
+        # Save logs to file
+        with open('food_logs.json', 'w') as f:
+            json.dump(st.session_state.food_logs, f)
+        
+        st.success(f"Added {food['FoodName']} ({weight}g) to your log")
+        st.rerun()
+
+# Initialize expander states if they don't exist
+if 'search_expanded' not in st.session_state:
+    st.session_state.search_expanded = False
+if 'log_expanded' not in st.session_state:
+    st.session_state.log_expanded = False
+
+# Function to toggle expander states
+def toggle_search_expander():
+    st.session_state.search_expanded = not st.session_state.search_expanded
     
-    # Add food to log
-    log_entry = {
-        'food_id': str(food['FoodID']),
-        'food_name': str(food['FoodName']),
-        'weight_g': int(weight),
-        'calories': int(food['Calories']),  # Per 100g
-        'protein': float(food['Protein']),    # Per 100g
-        'fat': float(food['Fat']),            # Per 100g
-        'carbs': float(food['Carbs']),        # Per 100g
-        'total_calories': int(nutrition['calories']),
-        'total_protein': round(float(nutrition['protein']), 1),
-        'total_fat': round(float(nutrition['fat']), 1),
-        'total_carbs': round(float(nutrition['carbs']), 1),
-        'time_added': pd.Timestamp.now().strftime("%H:%M")
-    }
-    
-    st.session_state.food_logs[date_str].append(log_entry)
-    
-    # Save logs to file
-    with open('food_logs.json', 'w') as f:
-        json.dump(st.session_state.food_logs, f)
-    
-    st.success(f"Added {food['FoodName']} ({weight}g) to your log")
-    st.rerun()
-
-# Function to normalize text for better matching
-def normalize_text(text):
-    if pd.isna(text):
-        return ""
-    # Convert to lowercase, remove punctuation    
-    return re.sub(r'[^\w\s]', '', str(text).lower())
-
-# Create normalized food names for better searching
-food_db['NormalizedName'] = food_db['FoodName'].apply(normalize_text)
+def toggle_log_expander():
+    st.session_state.log_expanded = not st.session_state.log_expanded
 
 # SECTION 1: Search functionality with autocomplete
-with st.expander("🔎 Search", expanded=False):
-    # Add a button to clear selection and search again
+with st.expander("🔎 Search", expanded=st.session_state.search_expanded):
+    # Track that this expander has been opened
+    if not st.session_state.search_expanded:
+        st.session_state.search_expanded = True
+
     if 'current_selection' not in st.session_state:
         st.session_state.current_selection = ""
     
@@ -276,8 +285,8 @@ with st.expander("🔎 Search", expanded=False):
             st.info("No food selected. Use the search box to find and select a food.")
 
 # SECTION 2: Display food log for selected date
-with st.expander("Food Log", expanded=False):
-    st.subheader(f"Food log details")
+with st.expander("📋 Food Log", expanded=False):
+    st.markdown(f"---")
     
     if date_str in st.session_state.food_logs and st.session_state.food_logs[date_str]:
         log_entries = st.session_state.food_logs[date_str]
