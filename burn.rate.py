@@ -108,18 +108,18 @@ with col2:
             gap: 10px;
         }
         .metric-box {
-            background-color: #000000;
+            background-color: #0E1117;
             border-radius: 5px;
             padding: 10px;
             text-align: center;
         }
         .metric-label {
-            font-size: 0.8rem;
+            font-size: 1rem;
             color: #FFFFFF;
             margin-bottom: 5px;
         }
         .metric-value {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #FFFFFF;
         }
